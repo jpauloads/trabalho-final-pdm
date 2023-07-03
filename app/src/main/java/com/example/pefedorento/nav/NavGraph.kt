@@ -90,21 +90,21 @@ fun NavGraph(
             )
         }
 
-        //tela adicionar PEDIDO
+        //tela busca PEDIDO
         composable(
-            route = Screens.TelaAdicionarPedido.route
+            route = Screens.TelaObterPedido.route
         ) {
-            TelaObterProduto(
+            TelaObterPedido(
                 navController = navController,
                 viewModelCompartilhada = viewModelCompartilhada
             )
         }
 
-        //tela busca PEDIDO
+        //tela adicionar PEDIDO
         composable(
-            route = Screens.TelaObterPedido.route
+            route = Screens.TelaAdicionarPedido.route
         ) {
-            TelaAdicionarProduto(
+            TelaAdicionarPedido(
                 navController = navController,
                 viewModelCompartilhada = viewModelCompartilhada
             )

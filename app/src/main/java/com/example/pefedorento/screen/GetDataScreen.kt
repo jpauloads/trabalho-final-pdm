@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.pefedorento.util.Cliente
+import com.example.pefedorento.util.Produto
 import com.example.pefedorento.util.ViewModelCompartilhada
 
 @Composable
@@ -161,6 +162,26 @@ fun GetDataScreen(
                     keyboardType = KeyboardType.Text,
                 )
             )
+
+            //botão salvar
+            Button(
+                modifier = Modifier
+                    .padding(top = 50.dp)
+                    .fillMaxWidth(),
+                onClick = {
+                    val cliente = Cliente(
+                        cpf = cpf,
+                        nome = nome,
+                        telefone = telefone,
+                        endereco = endereco,
+                        instagram = instagram,
+                    )
+                    viewModelCompartilhada.salvarCliente(cliente = cliente, context = context)
+                }
+            ) {
+                Text(text = "Salvar Alterações")
+            }
+
             //botão deletar
             Button(
                 modifier = Modifier.fillMaxWidth()

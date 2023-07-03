@@ -191,7 +191,7 @@ fun TelaObterProduto(
                     viewModelCompartilhada.salvarProduto(produto = produto, context = context)
                 }
             ) {
-                Text(text = "Salvar")
+                Text(text = "Salvar alterações")
             }
             //botão deletar
             Button(

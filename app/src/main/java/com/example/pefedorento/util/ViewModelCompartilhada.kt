@@ -11,6 +11,8 @@ import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class ViewModelCompartilhada() : ViewModel() {
@@ -179,7 +181,81 @@ class ViewModelCompartilhada() : ViewModel() {
         }
     }
 
-
     //============= CRUD PEDIDO ===============
+    //pedido com id unico
+    fun salvarPedido(pedido: Pedido, context: Context) = CoroutineScope(Dispatchers.IO).launch {
+        val firestore = Firebase.firestore
+        val collectionRef = firestore.collection("pedido")
+        val query = collectionRef.whereEqualTo("idPedido", pedido.idPedido)
 
+        try {
+            val task = query.get()
+            val querySnapshot = Tasks.await(task)
+
+            if (querySnapshot.isEmpty) {
+                collectionRef.document(pedido.idPedido)
+                    .set(pedido)
+                    .addOnSuccessListener {
+                        (context as Activity).runOnUiThread {
+                            Toast.makeText(context, "Pedido salvo com sucesso!", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        (context as Activity).runOnUiThread {
+                            Toast.makeText(context, "Falha ao salvar o pedido: ${exception.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+            } else {
+                (context as Activity).runOnUiThread {
+                    Toast.makeText(context, "Já existe um pedido com esse Id!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } catch (e: Exception) {
+            (context as Activity).runOnUiThread {
+                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    //deletar pedido pelo id
+    fun deletarPedido(
+        idPedido: String,
+        context: Context,
+        navController: NavController,
+    ) = CoroutineScope(Dispatchers.IO).launch {
+
+        val firestoreRef = Firebase.firestore.collection("pedido").document(idPedido)
+
+        try {
+            firestoreRef.delete().addOnSuccessListener {
+                Toast.makeText(context, "Deletado com sucesso", Toast.LENGTH_SHORT).show()
+                navController.popBackStack()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+    private val _pedidosPorCliente = MutableStateFlow<List<Pedido>>(emptyList())
+    val pedidosPorCliente: StateFlow<List<Pedido>> get() = _pedidosPorCliente
+    fun recuperarClientesPorPedido(
+        cpf: String,
+        context: Context
+    ) = CoroutineScope(Dispatchers.IO).launch {
+        val collectionRef = Firebase.firestore
+            .collection("pedido")
+            .whereEqualTo("cpf", cpf)
+
+        collectionRef.get()
+            .addOnSuccessListener { querySnapshot ->
+                val pedidos = querySnapshot.documents.mapNotNull { docSnapShot ->
+                    docSnapShot.toObject<Pedido>()
+                }
+                _pedidosPorCliente.value = pedidos
+            }
+            .addOnFailureListener {
+                Toast.makeText(context, "Erro ao recuperar os pedidos", Toast.LENGTH_SHORT).show()
+            }
+    }
 }
